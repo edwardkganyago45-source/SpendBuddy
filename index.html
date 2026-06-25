@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpendBuddy AI — Track every cent. Grow every rand.</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: '#3B82F6', dark: '#1E40AF' },
+            emerald: { DEFAULT: '#10B981', dark: '#059669' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <!-- Lock Screen / PIN Login -->
+  <div id="lock-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-emerald-900">
+    <div class="glass-card w-full max-w-sm mx-4 p-8 text-center">
+      <div class="mb-6">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-emerald-400 flex items-center justify-center shadow-lg">
+          <span class="text-4xl">💰</span>
+        </div>
+        <h1 class="text-2xl font-bold text-white">SpendBuddy AI</h1>
+        <p class="text-blue-200 text-sm mt-1">Track every cent. Grow every rand.</p>
+      </div>
+      <p id="pin-label" class="text-blue-100 text-sm mb-4">Enter your 4-digit PIN</p>
+      <div id="pin-dots" class="flex justify-center gap-4 mb-6">
+        <div class="pin-dot w-4 h-4 rounded-full border-2 border-blue-300 bg-transparent transition-all duration-200"></div>
+        <div class="pin-dot w-4 h-4 rounded-full border-2 border-blue-300 bg-transparent transition-all duration-200"></div>
+        <div class="pin-dot w-4 h-4 rounded-full border-2 border-blue-300 bg-transparent transition-all duration-200"></div>
+        <div class="pin-dot w-4 h-4 rounded-full border-2 border-blue-300 bg-transparent transition-all duration-200"></div>
+      </div>
+      <div id="pin-pad" class="grid grid-cols-3 gap-3 max-w-xs mx-auto">
+        <button class="pin-btn" data-digit="1">1</button>
+        <button class="pin-btn" data-digit="2">2</button>
+        <button class="pin-btn" data-digit="3">3</button>
+        <button class="pin-btn" data-digit="4">4</button>
+        <button class="pin-btn" data-digit="5">5</button>
+        <button class="pin-btn" data-digit="6">6</button>
+        <button class="pin-btn" data-digit="7">7</button>
+        <button class="pin-btn" data-digit="8">8</button>
+        <button class="pin-btn" data-digit="9">9</button>
+        <button class="pin-btn pin-btn-clear" data-action="clear">CLR</button>
+        <button class="pin-btn" data-digit="0">0</button>
+        <button class="pin-btn pin-btn-del" data-action="delete">⌫</button>
+      </div>
+      <p class="text-blue-300 text-xs mt-4">Default PIN: 1234</p>
+    </div>
+  </div>
+
+  <!-- Main App Shell -->
+  <div id="app-shell" class="hidden h-full flex flex-col md:flex-row">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar fixed md:relative z-40 h-full w-64 bg-white dark:bg-gray-900 shadow-xl flex-shrink-0 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0">
+      <div class="p-6 border-b border-gray-100 dark:border-gray-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center shadow">
+            <span class="text-xl">💰</span>
+          </div>
+          <div>
+            <h1 class="font-bold text-gray-900 dark:text-white text-lg leading-tight">SpendBuddy</h1>
+            <span class="text-xs text-blue-500 font-semibold">AI</span>
+          </div>
+        </div>
+      </div>
+      <nav class="flex-1 p-4 overflow-y-auto space-y-5">
+
+        <!-- Overview -->
+        <div>
+          <p class="nav-section-label">Overview</p>
+          <div class="space-y-0.5">
+            <a href="#dashboard" class="nav-link" data-page="dashboard">
+              <span class="nav-icon">📊</span><span>Dashboard</span>
+            </a>
+            <a href="#analytics" class="nav-link" data-page="analytics">
+              <span class="nav-icon">�</span><span>Analytics</span>
+            </a>
+            <a href="#ai" class="nav-link" data-page="ai">
+              <span class="nav-icon">🤖</span><span>AI Insights</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Finance -->
+        <div>
+          <p class="nav-section-label">Finance</p>
+          <div class="space-y-0.5">
+            <a href="#income" class="nav-link" data-page="income">
+              <span class="nav-icon">�</span><span>Income</span>
+            </a>
+            <a href="#expenses" class="nav-link" data-page="expenses">
+              <span class="nav-icon">💸</span><span>Expenses</span>
+            </a>
+            <a href="#budget" class="nav-link" data-page="budget">
+              <span class="nav-icon">�</span><span>Budget Planner</span>
+            </a>
+            <a href="#goals" class="nav-link" data-page="goals">
+              <span class="nav-icon">🏆</span><span>Savings Goals</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Account -->
+        <div>
+          <p class="nav-section-label">Account</p>
+          <div class="space-y-0.5">
+            <a href="#settings" class="nav-link" data-page="settings">
+              <span class="nav-icon">⚙️</span><span>Settings</span>
+            </a>
+          </div>
+        </div>
+
+      </nav>
+      <div class="p-4 border-t border-gray-100 dark:border-gray-800 space-y-1">
+        <button id="lock-btn" class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200 text-sm font-medium">
+          <span>🔒</span><span>Lock App</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Sidebar overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-30 bg-black/50 hidden md:hidden" id="sidebar-overlay"></div>
+
+    <!-- Main content -->
+    <div class="flex-1 flex flex-col min-h-0 md:overflow-hidden">
+      <!-- Top bar -->
+      <header class="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center gap-3 flex-shrink-0 shadow-sm">
+        <button id="menu-btn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+        <div class="flex-1">
+          <h2 id="page-title" class="text-lg font-bold text-gray-900 dark:text-white">Dashboard</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="theme-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-lg" title="Toggle dark mode">🌙</button>
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-white text-sm font-bold">U</div>
+        </div>
+      </header>
+
+      <!-- Page content -->
+      <main id="page-content" class="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
+        <!-- Rendered by JS -->
+      </main>
+    </div>
+
+    <!-- Mobile bottom nav -->
+    <nav class="mobile-bottom-nav md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 flex items-center justify-around px-1 py-1 shadow-lg">
+      <a href="#dashboard" class="mobile-nav-item" data-page="dashboard">
+        <span class="text-xl">📊</span>
+        <span>Home</span>
+      </a>
+      <a href="#income" class="mobile-nav-item" data-page="income">
+        <span class="text-xl">💵</span>
+        <span>Income</span>
+      </a>
+      <a href="#expenses" class="mobile-nav-item" data-page="expenses">
+        <span class="text-xl">💸</span>
+        <span>Expenses</span>
+      </a>
+      <a href="#budget" class="mobile-nav-item" data-page="budget">
+        <span class="text-xl">🎯</span>
+        <span>Budget</span>
+      </a>
+      <a href="#goals" class="mobile-nav-item" data-page="goals">
+        <span class="text-xl">🏆</span>
+        <span>Goals</span>
+      </a>
+      <a href="#ai" class="mobile-nav-item" data-page="ai">
+        <span class="text-xl">🤖</span>
+        <span>AI</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Modal container -->
+  <div id="modal-overlay" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div id="modal-box" class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 opacity-0">
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
